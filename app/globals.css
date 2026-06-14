@@ -1,0 +1,19 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --color-primary: #16a34a;
+  --color-primary-dark: #14532d;
+  --color-background: #f3f4f6;
+}
+
+html,
+body {
+  background-color: var(--color-background);
+  color: #111827;
+}
+
+* {
+  -webkit-tap-highlight-color: transparent;
+}

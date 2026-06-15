@@ -1,36 +1,116 @@
-export default function Home() {
-  const supabaseConfigured = Boolean(
-    process.env.NEXT_PUBLIC_SUPABASE_URL &&
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-  );
+import Link from "next/link";
+import { createClient } from "@/lib/supabase/server";
+import { CATEGORIES } from "@/lib/constants";
+import ListingCard from "@/components/ListingCard";
+import type { ListingWithImages } from "@/lib/types";
+
+export default async function Home() {
+  const supabase = await createClient();
+  const { data: userData } = await supabase.auth.getUser();
+  const user = userData.user;
+
+  const { data: listings } = await supabase
+    .from("listings")
+    .select(
+      "id, user_id, title, description, price, category, city, whatsapp, status, created_at, listing_images(id, listing_id, image_url, created_at)"
+    )
+    .eq("status", "approved")
+    .order("created_at", { ascending: false })
+    .limit(8);
+
+  const recentListings = (listings ?? []) as ListingWithImages[];
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center px-6 text-center">
-      <h1 className="text-3xl font-bold text-primary-dark">MozMarketHub</h1>
-      <p className="mt-2 text-base text-gray-600">
-        Compre, venda e anuncie em Moçambique.
-      </p>
+    <main className="mx-auto min-h-[calc(100vh-57px)] max-w-5xl px-4 py-8">
+      <section className="rounded-lg bg-primary-dark px-6 py-10 text-center text-white">
+        <h1 className="text-2xl font-bold sm:text-3xl">
+          Compre, venda e anuncie em Moçambique
+        </h1>
+        <p className="mx-auto mt-2 max-w-md text-sm text-white/80 sm:text-base">
+          Produtos, serviços, veículos, casas e empregos — tudo num só lugar.
+        </p>
 
-      <div className="mt-8 w-full max-w-sm rounded-lg border border-gray-200 bg-white p-4 text-left text-sm">
-        <p className="font-semibold text-gray-800">Estado da base do projeto</p>
-        <ul className="mt-2 space-y-1 text-gray-600">
-          <li>✅ Next.js 15 + Tailwind configurados</li>
-          <li>
-            {supabaseConfigured ? "✅" : "⚠️"} Variáveis do Supabase{" "}
-            {supabaseConfigured ? "configuradas" : "não configuradas"}
-          </li>
-        </ul>
-        {!supabaseConfigured && (
-          <p className="mt-3 text-xs text-gray-500">
-            Copie .env.local.example para .env.local e preencha as suas
-            credenciais do Supabase.
-          </p>
+        <form action="/anuncios" method="get" className="mx-auto mt-6 flex max-w-md gap-2">
+          <label htmlFor="q" className="sr-only">
+            Pesquisar
+          </label>
+          <input
+            id="q"
+            name="q"
+            type="search"
+            placeholder="O que está a procurar?"
+            className="w-full rounded-md border-0 px-4 py-3 text-base text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary"
+          />
+          <button
+            type="submit"
+            className="shrink-0 rounded-md bg-primary px-5 py-3 text-sm font-semibold text-white hover:bg-primary/90"
+          >
+            Pesquisar
+          </button>
+        </form>
+
+        <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:justify-center">
+          {user ? (
+            <Link
+              href="/anuncios/novo"
+              className="rounded-md bg-primary px-6 py-3 text-sm font-semibold text-white hover:bg-primary/90"
+            >
+              Publicar anúncio
+            </Link>
+          ) : (
+            <>
+              <Link
+                href="/registo"
+                className="rounded-md bg-primary px-6 py-3 text-sm font-semibold text-white hover:bg-primary/90"
+              >
+                Criar conta gratuita
+              </Link>
+              <Link
+                href="/login"
+                className="rounded-md border border-white px-6 py-3 text-sm font-semibold text-white hover:bg-white/10"
+              >
+                Entrar
+              </Link>
+            </>
+          )}
+        </div>
+      </section>
+
+      <section className="mt-8">
+        <h2 className="text-lg font-semibold text-gray-800">Categorias</h2>
+        <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-4">
+          {CATEGORIES.map((category) => (
+            <Link
+              key={category.slug}
+              href={`/anuncios?categoria=${category.slug}`}
+              className="rounded-lg border border-gray-200 bg-white px-4 py-4 text-center text-sm font-medium text-gray-700 transition hover:border-primary hover:text-primary-dark"
+            >
+              {category.name}
+            </Link>
+          ))}
+        </div>
+      </section>
+
+      <section className="mt-8">
+        <div className="flex items-center justify-between">
+          <h2 className="text-lg font-semibold text-gray-800">Últimos anúncios</h2>
+          <Link href="/anuncios" className="text-sm font-medium text-primary-dark hover:underline">
+            Ver todos
+          </Link>
+        </div>
+
+        {recentListings.length === 0 ? (
+          <div className="mt-3 rounded-lg border border-gray-200 bg-white p-6 text-center text-sm text-gray-500">
+            Ainda não há anúncios publicados. Seja o primeiro!
+          </div>
+        ) : (
+          <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-4">
+            {recentListings.map((listing) => (
+              <ListingCard key={listing.id} listing={listing} />
+            ))}
+          </div>
         )}
-      </div>
-
-      <p className="mt-8 text-xs text-gray-400">
-        Módulo 1 concluído. Pronto para o Módulo 2 — Autenticação.
-      </p>
+      </section>
     </main>
   );
 }

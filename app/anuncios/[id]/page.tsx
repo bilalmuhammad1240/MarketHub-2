@@ -38,9 +38,8 @@ export default async function AnuncioPage({
   }
 
   const images = (listing.listing_images ?? []) as ListingImage[];
-  const sellerName =
-  Array.isArray(listing.profiles)
-    ? listing.profiles[0]?.name ?? "Vendedor";
+  const sellerName: string =
+  listing.profiles?.[0]?.name ?? "Vendedor";
   const status = listing.status as ListingStatus;
 
   const waLink = whatsappLink(

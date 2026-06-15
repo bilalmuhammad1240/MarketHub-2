@@ -1,4 +1,4 @@
-# MozMarketHub — Módulo 1 + Módulo 2 + Módulo 3 + Módulo 4
+# MozMarketHub — Módulos 1 a 5
 
 Marketplace digital para Moçambique. Esta entrega inclui:
 
@@ -10,6 +10,8 @@ Marketplace digital para Moçambique. Esta entrega inclui:
   imagens (até 5), página pública do anúncio e painel "Os meus anúncios".
 - **Módulo 4 — Pesquisa e filtros:** pesquisa por texto, filtro por
   categoria e cidade, ordenação e paginação.
+- **Módulo 5 — Administração:** painel admin para aprovar/rejeitar (com
+  motivo) e eliminar anúncios, e ver utilizadores e estatísticas.
 
 ## Stack
 
@@ -50,9 +52,15 @@ mozmarkethub/
 │   │           ├── page.tsx           # Editar (dono)
 │   │           ├── listing-edit-form.tsx
 │   │           └── actions.ts         # Server actions: updateListing, deleteListing
-│   └── meus-anuncios/
-│       ├── page.tsx                   # Painel do utilizador (seção 5.5)
-│       └── delete-listing-button.tsx
+│   ├── meus-anuncios/
+│   │   ├── page.tsx                   # Painel do utilizador (seção 5.5)
+│   │   └── delete-listing-button.tsx
+│   └── admin/
+│       ├── layout.tsx                 # Guarda de rota (apenas role=admin)
+│       ├── page.tsx                   # Estatísticas (seção 5.6)
+│       ├── actions.ts                 # approveListing, rejectListing, adminDeleteListing
+│       ├── anuncios/page.tsx          # Moderação: aprovar/rejeitar/eliminar
+│       └── utilizadores/page.tsx      # Lista de utilizadores
 ├── components/
 │   ├── Header.tsx                     # Navbar (estado de autenticação)
 │   ├── LogoutButton.tsx
@@ -66,6 +74,8 @@ mozmarkethub/
 │   ├── constants.ts                   # Cidades de Moçambique + categorias
 │   ├── types.ts                       # Profile, Listing, ListingImage...
 │   ├── utils.ts                       # formatPrice, whatsappLink, etc.
+│   ├── admin.ts                       # requireAdmin() — guarda de rota
+│   ├── listing-deletion.ts            # Eliminação partilhada (dono + admin)
 │   └── supabase/
 │       ├── client.ts                  # Cliente Supabase para o browser
 │       ├── server.ts                  # Cliente Supabase para Server Components
@@ -113,6 +123,7 @@ mozmarkethub/
 
    1. `supabase/migrations/0001_create_profiles.sql`
    2. `supabase/migrations/0002_create_listings.sql`
+   3. `supabase/migrations/0003_admin.sql`
 
    A segunda migração cria:
    - as tabelas `listings` e `listing_images` (especificação, seções 6.2/6.3);
@@ -123,6 +134,19 @@ mozmarkethub/
      os seus, mesmo pendentes/rejeitados);
    - o bucket público **`listings`** no Storage, com políticas para leitura
      pública e upload/eliminação apenas pelo dono.
+
+   A terceira migração (Módulo 5) adiciona:
+   - a coluna `profiles.role` (`user` | `admin`) e `listings.rejection_reason`;
+   - a função `is_admin()` e a RPC `admin_set_listing_status(...)`, usada
+     para aprovar/rejeitar anúncios sem reiniciar a revisão;
+   - políticas RLS extra: administradores veem/editam/eliminam todos os
+     anúncios e veem todos os perfis;
+   - **correção de privacidade**: a política de `profiles` da migração 0001
+     (`using (true)`, que tornava email/telefone de todos os utilizadores
+     legíveis publicamente) é substituída por: o próprio utilizador vê o seu
+     perfil; administradores veem todos; e qualquer pessoa vê o perfil de um
+     vendedor com pelo menos um anúncio aprovado (para "Anunciado por
+     &lt;nome&gt;").
 
 5. **Configurar a confirmação de email (opcional, mas recomendado)**
 
@@ -137,7 +161,19 @@ mozmarkethub/
    > Pode desativar "Confirm email" em **Authentication > Providers > Email**
    > durante os testes — o registo continua a funcionar (entra direto).
 
-6. **Correr em ambiente local**
+6. **Tornar-se administrador**
+
+   Não existe registo de administradores pela interface. Depois de criar a
+   sua conta em `/registo`, no **SQL Editor** do Supabase execute:
+
+   ```sql
+   update public.profiles set role = 'admin' where email = 'seu@email.com';
+   ```
+
+   Volte a entrar (logout/login) e o link **"Admin"** aparece no cabeçalho,
+   dando acesso a `/admin`.
+
+7. **Correr em ambiente local**
 
    ```bash
    npm run dev
@@ -147,16 +183,17 @@ mozmarkethub/
 
    - **Criar conta / Entrar:** `/registo`, `/login`
    - **Publicar anúncio:** `/anuncios/novo` (até 5 fotos, JPG/PNG/WEBP, máx 5MB cada)
+   - **Pesquisar:** `/anuncios`
    - **Ver anúncio:** `/anuncios/[id]`
    - **Editar/eliminar:** `/anuncios/[id]/editar`
    - **Painel do utilizador:** `/meus-anuncios`
+   - **Painel admin** (após promover a sua conta, passo 6): `/admin`,
+     `/admin/anuncios`, `/admin/utilizadores`
 
    > Os anúncios novos ficam com estado **"Pendente"** e só aparecem na
-   > página inicial depois de aprovados. Para testar o fluxo completo antes
-   > do Módulo 5 (Admin), pode aprovar manualmente no Supabase: tabela
-   > `listings` > editar a linha > `status = approved`.
+   > pesquisa/página inicial depois de aprovados em `/admin/anuncios`.
 
-7. **Deploy na Vercel**
+8. **Deploy na Vercel**
 
    - Faça push deste código para o GitHub.
    - Importe o repositório na [Vercel](https://vercel.com).
@@ -190,9 +227,25 @@ funções serverless (ex.: ~4.5MB na Vercel) mesmo com várias fotos grandes.
 - Tudo funciona com formulários `GET` simples — sem JavaScript obrigatório,
   bom para ligações lentas (princípio "internet fraca").
 
+## Administração (Módulo 5)
+
+- **`/admin`** — estatísticas: total de utilizadores, total de anúncios, e
+  contagem por estado (pendente/aprovado/rejeitado).
+- **`/admin/anuncios`** — fila de moderação com separadores por estado.
+  Cada anúncio tem "Aprovar", "Rejeitar" (com motivo opcional, mostrado ao
+  dono) e "Eliminar".
+- **`/admin/utilizadores`** — lista de utilizadores com nome, email, cidade,
+  data de registo e número de anúncios.
+- Acesso restrito por `profiles.role = 'admin'` (RLS + verificação na
+  aplicação); utilizadores normais recebem 404 em `/admin/*`.
+- Aprovar/rejeitar usa a função SQL `admin_set_listing_status(...)`, que
+  altera o estado sem reativar o trigger que devolveria o anúncio a
+  "pending".
+
 ## Próximo passo
 
-Módulo 5 — Administração: painel admin para aprovar/rejeitar anúncios, ver
-utilizadores e estatísticas básicas (especificação, seção 5.6).
+Todos os módulos do plano original (1 a 5) estão implementados. Possíveis
+melhorias futuras (fora do MVP, especificação seção 12): pagamentos
+M-Pesa/e-Mola, anúncios em destaque, apps móveis, sistema de reputação.
 
 

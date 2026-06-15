@@ -5,6 +5,7 @@ import { redirect, notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { CATEGORIES, MOZAMBIQUE_CITIES } from "@/lib/constants";
 import { isValidMozambiquePhone, extractStoragePath } from "@/lib/utils";
+import { deleteListingWithImages } from "@/lib/listing-deletion";
 import type { ListingFieldValues } from "@/components/ListingFields";
 import type { ListingActionState } from "@/app/anuncios/novo/actions";
 
@@ -154,22 +155,7 @@ export async function deleteListing(formData: FormData) {
     notFound();
   }
 
-  const { data: images } = await supabase
-    .from("listing_images")
-    .select("image_url")
-    .eq("listing_id", listingId);
-
-  const paths = (images ?? [])
-    .map((image) => extractStoragePath(image.image_url, BUCKET))
-    .filter((path): path is string => Boolean(path));
-
-  if (paths.length > 0) {
-    await supabase.storage.from(BUCKET).remove(paths);
-  }
-
-  // As linhas em "listing_images" são removidas automaticamente
-  // (ON DELETE CASCADE).
-  await supabase.from("listings").delete().eq("id", listingId);
+  await deleteListingWithImages(supabase, listingId);
 
   revalidatePath("/");
   revalidatePath("/meus-anuncios");

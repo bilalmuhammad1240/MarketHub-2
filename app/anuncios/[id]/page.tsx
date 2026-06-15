@@ -4,7 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import ImageCarousel from "@/components/ImageCarousel";
 import StatusBadge from "@/components/StatusBadge";
 import { formatPrice, getCategoryName, whatsappLink } from "@/lib/utils";
-import type { ListingImage, ListingStatus } from "@/lib/types";
+import type { ListingImage, ListingStatus, SellerProfile } from "@/lib/types";
 
 export default async function AnuncioPage({
   params,
@@ -20,7 +20,7 @@ export default async function AnuncioPage({
   const { data: listing } = await supabase
     .from("listings")
     .select(
-      "id, user_id, title, description, price, category, city, whatsapp, status, created_at, listing_images(id, listing_id, image_url, created_at), profiles(name)"
+      "id, user_id, title, description, price, category, city, whatsapp, status, rejection_reason, created_at, listing_images(id, listing_id, image_url, created_at), profiles(name)"
     )
     .eq("id", id)
     .single();
@@ -38,9 +38,14 @@ export default async function AnuncioPage({
   }
 
   const images = (listing.listing_images ?? []) as ListingImage[];
-  const sellerName: string =
-  listing.profiles?.[0]?.name ?? "Vendedor";
   const status = listing.status as ListingStatus;
+
+  // O supabase-js infere "profiles" como array (sem tipos gerados do
+  // schema), mas o PostgREST devolve um objeto único nesta relação
+  // (listings.user_id -> profiles.id). Tratamos os dois casos.
+  const sellerProfile = listing.profiles as SellerProfile;
+  const seller = Array.isArray(sellerProfile) ? sellerProfile[0] : sellerProfile;
+  const sellerName: string = seller?.name ?? "Vendedor";
 
   const waLink = whatsappLink(
     listing.whatsapp,
@@ -50,13 +55,20 @@ export default async function AnuncioPage({
   return (
     <main className="mx-auto min-h-[calc(100vh-57px)] max-w-3xl px-4 py-6">
       {isOwner && status !== "approved" && (
-        <div className="mb-4 flex items-center justify-between gap-3 rounded-md border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
-          <span>
-            {status === "pending"
-              ? "O seu anúncio está em revisão e ainda não é visível ao público."
-              : "O seu anúncio foi rejeitado e não é visível ao público."}
-          </span>
-          <StatusBadge status={status} />
+        <div className="mb-4 rounded-md border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+          <div className="flex items-center justify-between gap-3">
+            <span>
+              {status === "pending"
+                ? "O seu anúncio está em revisão e ainda não é visível ao público."
+                : "O seu anúncio foi rejeitado e não é visível ao público."}
+            </span>
+            <StatusBadge status={status} />
+          </div>
+          {status === "rejected" && listing.rejection_reason && (
+            <p className="mt-2">
+              <span className="font-semibold">Motivo:</span> {listing.rejection_reason}
+            </p>
+          )}
         </div>
       )}
 

@@ -6,6 +6,7 @@ export type Profile = {
   email: string;
   phone: string | null;
   city: string | null;
+  role: "user" | "admin";
   created_at: string;
 };
 
@@ -22,6 +23,7 @@ export type Listing = {
   city: string;
   whatsapp: string;
   status: ListingStatus;
+  rejection_reason: string | null;
   created_at: string;
 };
 
@@ -37,7 +39,11 @@ export type ListingWithImages = Listing & {
   listing_images: ListingImage[];
 };
 
-export type ListingWithSeller = ListingWithImages & {
-  profiles: { name: string; phone: string | null } | null;
-};
+// O supabase-js, sem tipos gerados a partir do schema, infere recursos
+// "embedded" (ex.: profiles(name)) como array, mesmo quando a relação é
+// "um para muitos" do lado oposto (e o PostgREST devolve um objeto único
+// em runtime). Este tipo cobre ambas as formas para permitir um acesso
+// seguro e correto independentemente do formato devolvido.
+export type SellerProfile = { name: string } | { name: string }[] | null;
+
 

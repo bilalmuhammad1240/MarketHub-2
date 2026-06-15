@@ -8,15 +8,17 @@ export default async function Header() {
   const user = data.user;
 
   let displayName: string | null = null;
+  let isAdmin = false;
 
   if (user) {
     const { data: profile } = await supabase
       .from("profiles")
-      .select("name")
+      .select("name, role")
       .eq("id", user.id)
       .single();
 
     displayName = profile?.name ?? user.email ?? "Conta";
+    isAdmin = profile?.role === "admin";
   }
 
   return (
@@ -49,6 +51,14 @@ export default async function Header() {
 
           {user ? (
             <>
+              {isAdmin && (
+                <Link
+                  href="/admin"
+                  className="rounded-md border border-primary-dark px-3 py-2 text-xs font-semibold text-primary-dark hover:bg-primary-dark hover:text-white sm:text-sm"
+                >
+                  Admin
+                </Link>
+              )}
               <Link
                 href="/anuncios/novo"
                 className="rounded-md bg-primary px-3 py-2 text-xs font-semibold text-white hover:bg-primary-dark sm:text-sm"

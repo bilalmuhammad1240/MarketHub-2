@@ -45,7 +45,7 @@ export default async function AdminAnunciosPage({
   let query = supabase
     .from("listings")
     .select(
-      "id, title, price, city, category, status, rejection_reason, created_at, listing_images(image_url), profiles(name, email)",
+      "id, title, price, city, category, status, rejection_reason, created_at, listing_images(image_url), profiles(name)",
       { count: "exact" }
     )
     .order("created_at", { ascending: false });
@@ -103,10 +103,9 @@ export default async function AdminAnunciosPage({
         <div className="mt-3 space-y-3">
           {listings.map((listing) => {
             const cover = listing.listing_images?.[0]?.image_url;
-            const sellerData = Array.isArray(listing.profiles)
-              ? listing.profiles[0]
-              : listing.profiles;
-            const seller = sellerData as { name: string; email?: string } | undefined;
+            const profilesRaw = listing.profiles as SellerProfile;
+            const profileObj = Array.isArray(profilesRaw) ? profilesRaw[0] : profilesRaw;
+            const sellerName: string | null = profileObj?.name ?? null;
 
             return (
               <div key={listing.id} className="rounded-lg border border-gray-200 bg-white p-3">
@@ -136,8 +135,8 @@ export default async function AdminAnunciosPage({
                     <p className="text-xs text-gray-500">
                       {listing.city} · {getCategoryName(listing.category)}
                     </p>
-                    {seller && (
-                      <p className="mt-1 truncate text-xs text-gray-400">{seller.name}</p>
+                    {sellerName && (
+                      <p className="mt-1 truncate text-xs text-gray-400">{sellerName}</p>
                     )}
                     {listing.status === "rejected" && listing.rejection_reason && (
                       <p className="mt-1 text-xs text-red-600">

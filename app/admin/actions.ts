@@ -4,10 +4,11 @@ import { revalidatePath } from "next/cache";
 import { redirect, notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { deleteListingWithImages } from "@/lib/listing-deletion";
+import type { SupabaseClient } from "@supabase/supabase-js";
 
 const VALID_TABS = ["pending", "approved", "rejected", "all"];
 
-async function ensureAdmin() {
+async function ensureAdmin(): Promise<SupabaseClient> {
   const supabase = await createClient();
   const { data: userData } = await supabase.auth.getUser();
   const user = userData.user;
@@ -26,7 +27,7 @@ async function ensureAdmin() {
     notFound();
   }
 
-  return supabase;
+  return supabase as unknown as SupabaseClient;
 }
 
 function adminAnunciosHref(formData: FormData): string {

@@ -97,8 +97,10 @@ export async function updateListing(formData: FormData): Promise<ListingActionSt
     .eq("id", listingId);
 
   if (updateError) {
+    console.error("updateListing: erro ao atualizar 'listings'", updateError);
+
     return {
-      error: "Não foi possível guardar as alterações. Tente novamente.",
+      error: `Não foi possível guardar as alterações (${updateError.code ?? "erro"}): ${updateError.message}`,
       values,
     };
   }

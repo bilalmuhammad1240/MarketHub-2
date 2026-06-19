@@ -99,13 +99,16 @@ export async function createListing(formData: FormData): Promise<ListingActionSt
     .select("id")
     .single();
 
-  if (insertError || !listing) {
+  ifif (insertError || !listing) {
++   console.error("createListing insert error:", insertError);
     return {
-      error: "Não foi possível publicar o anúncio. Tente novamente.",
+-     error: "Não foi possível publicar o anúncio. Tente novamente.",
++     error: insertError
++       ? `Não foi possível publicar o anúncio: ${insertError.message}`
++       : "Não foi possível publicar o anúncio. Tente novamente.",
       values,
     };
   }
-
   if (imageUrls.length > 0) {
     const rows = imageUrls.map((image_url) => ({
       listing_id: listing.id,

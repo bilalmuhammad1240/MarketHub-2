@@ -2,8 +2,12 @@ import Link from "next/link";
 import Image from "next/image";
 import { formatPrice } from "@/lib/utils";
 import type { ListingWithImages } from "@/lib/types";
+import ImageCarousel from "@/components/ImageCarousel";
 
 export default function ListingCard({ listing }: { listing: ListingWithImages }) {
+    
+    <ImageCarousel images={listing.listing_images || []} />
+    
   const cover = listing.listing_images?.[0]?.image_url;
 
   return (
@@ -37,3 +41,5 @@ export default function ListingCard({ listing }: { listing: ListingWithImages })
     </Link>
   );
 }
+
+

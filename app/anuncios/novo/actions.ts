@@ -100,12 +100,12 @@ export async function createListing(formData: FormData): Promise<ListingActionSt
     .single();
 
 if (insertError || !listing) {
-+   console.error("createListing insert error:", insertError);
+  console.error("createListing insert error:", insertError);
     return {
--     error: "Não foi possível publicar o anúncio. Tente novamente.",
-+     error: insertError
-+       ? `Não foi possível publicar o anúncio: ${insertError.message}`
-+       : "Não foi possível publicar o anúncio. Tente novamente.",
+    error: "Não foi possível publicar o anúncio. Tente novamente.",
+    error: insertError
+     ? `Não foi possível publicar o anúncio: ${insertError.message}`
+      : "Não foi possível publicar o anúncio. Tente novamente.",
       values,
     };
   }  

@@ -53,6 +53,8 @@ export async function signup(formData: FormData) {
   const next = String(formData.get("next") ?? "").trim();
   const safeNext = next.startsWith("/") ? next : "";
 
+  const nextQuery = safeNext ? `next=${encodeURIComponent(safeNext)}` : "";
+
   if (!name || !email || !phone || !city || !password) {
     const params = new URLSearchParams({ error: "Preencha todos os campos." });
     if (safeNext) params.set("next", safeNext);
@@ -95,7 +97,7 @@ export async function signup(formData: FormData) {
     redirect(safeNext || "/");
   }
 
-  redirect(`/registo/confirmar${safeNext ? `?next=${encodeURIComponent(safeNext)}` : ""}`);
+  redirect(`/registo/confirmar${nextQuery ? `?${nextQuery}` : ""}`);
 }
 
 export async function logout() {

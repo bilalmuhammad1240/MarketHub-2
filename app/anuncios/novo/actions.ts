@@ -99,7 +99,7 @@ export async function createListing(formData: FormData): Promise<ListingActionSt
     .select("id")
     .single();
 
-if (insertError || !listing) {
+  ifif (insertError || !listing) {
 +   console.error("createListing insert error:", insertError);
     return {
 -     error: "Não foi possível publicar o anúncio. Tente novamente.",
@@ -108,19 +108,14 @@ if (insertError || !listing) {
 +       : "Não foi possível publicar o anúncio. Tente novamente.",
       values,
     };
-  }  
-
+  }
   if (imageUrls.length > 0) {
-    const { error: imagesError } = await supabase.from("listing_images").insert(
-      imageUrls.map((image_url) => ({
-        listing_id: listing.id,
-        image_url,
-      }))
-    );
+    const rows = imageUrls.map((image_url) => ({
+      listing_id: listing.id,
+      image_url,
+    }));
 
-    if (imagesError) {
-      console.error("createListing: erro ao inserir em 'listing_images'", imagesError);
-    }
+    await supabase.from("listing_images").insert(rows);
   }
 
   revalidatePath("/");

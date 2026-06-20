@@ -99,15 +99,15 @@ export async function createListing(formData: FormData): Promise<ListingActionSt
     .select("id")
     .single();
 
-if (insertError || !listing) {
-  console.error("createListing insert error:", insertError);
+  if (insertError || !listing) {
+    console.error("createListing insert error:", insertError);
     return {
-    error: insertError
-     ? `Não foi possível publicar o anúncio: ${insertError.message}`
-      : "Não foi possível publicar o anúncio. Tente novamente.",
+      error: insertError
+        ? `Não foi possível publicar o anúncio: ${insertError.message}`
+        : "Não foi possível publicar o anúncio. Tente novamente.",
       values,
     };
-  }  
+  }
 
   if (imageUrls.length > 0) {
     const { error: imagesError } = await supabase.from("listing_images").insert(

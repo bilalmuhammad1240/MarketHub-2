@@ -5,9 +5,6 @@ import type { ListingWithImages } from "@/lib/types";
 
 
 export default function ListingCard({ listing }: { listing: ListingWithImages }) {
-    
-
-    
   const cover = listing.listing_images?.[0]?.image_url;
 
   return (

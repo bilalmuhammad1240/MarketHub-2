@@ -227,7 +227,43 @@ funções serverless (ex.: ~4.5MB na Vercel) mesmo com várias fotos grandes.
 - Tudo funciona com formulários `GET` simples — sem JavaScript obrigatório,
   bom para ligações lentas (princípio "internet fraca").
 
-## Administração (Módulo 5)
+## Sistema de debug visível (toasts + logs)
+
+Para facilitar a deteção de erros sem precisar de acesso às DevTools:
+
+- **`components/Toast.tsx`** — sistema de notificações na tela (`ToastProvider`,
+  hook `useToast()`). Erros ficam visíveis 15 segundos; mensagens de
+  sucesso/info, 6 segundos. Está montado no `app/layout.tsx`, por isso
+  qualquer Client Component pode usar `useToast()`.
+- **`components/TrackedImage.tsx`** — substituto de `next/image` usado em
+  todos os locais que mostram fotos do Supabase Storage. Se uma imagem
+  falhar a carregar, mostra um aviso no próprio local da imagem + toast +
+  `console.error` com o URL exato que falhou.
+- **`components/QueryErrorToast.tsx`** — Client Component que lê um erro
+  vindo de um redirect do servidor (ex.: `?imageError=...`,
+  `?actionError=...`) e mostra-o como toast assim que a página carrega.
+  Usado quando uma Server Action falha *depois* de já ter feito redirect
+  (ex.: anúncio criado com sucesso, mas as fotos não foram guardadas).
+- **`app/global-error.tsx`** — ecrã de erro global do Next.js, substituído
+  para mostrar a mensagem e o `digest` do erro diretamente na tela, em vez
+  do ecrã genérico "Application error".
+
+**Todas as Server Actions e queries principais** (`createListing`,
+`updateListing`, `deleteListing`, `approveListing`, `rejectListing`,
+`adminDeleteListing`, `updateProfile`, `login`, `signup`, `logout`, e as
+queries de listagem em cada página) têm `console.error`/`console.warn`
+detalhados (código, mensagem, `details`, `hint` do Postgres/PostgREST) —
+visíveis no terminal em desenvolvimento, e em **Vercel > o seu projeto >
+Logs / Runtime Logs** em produção.
+
+> **Nota técnica:** os formulários de criar/editar anúncio (`listing-form.tsx`,
+> `listing-edit-form.tsx`) chamam Server Actions que terminam com
+> `redirect()`. O Next.js sinaliza isso lançando uma exceção especial
+> (`digest` a começar por `NEXT_REDIRECT`); os dois formulários verificam
+> isso explicitamente (`isNextRedirectError`) antes de tratar uma exceção
+> como erro real, para não bloquear o redirect de sucesso.
+
+
 
 - **`/admin`** — estatísticas: total de utilizadores, total de anúncios, e
   contagem por estado (pendente/aprovado/rejeitado).

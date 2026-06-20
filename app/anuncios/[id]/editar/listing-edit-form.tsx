@@ -1,12 +1,27 @@
 "use client";
 
 import { useRef, useState } from "react";
-import Image from "next/image";
+import TrackedImage from "@/components/TrackedImage";
 import { createClient } from "@/lib/supabase/client";
 import { updateListing } from "./actions";
 import ListingFields, { type ListingFieldValues } from "@/components/ListingFields";
 import ImageUploadField, { type ImageUploadFieldRef } from "@/components/ImageUploadField";
+import { useToast } from "@/components/Toast";
 import type { Listing, ListingImage } from "@/lib/types";
+
+// O Next.js sinaliza um redirect() chamado numa Server Action lançando uma
+// exceção especial com "digest" a começar por "NEXT_REDIRECT". Isto NUNCA
+// deve ser tratado como um erro real — apenas relançado para o Next.js
+// completar a navegação.
+function isNextRedirectError(err: unknown): boolean {
+  return (
+    typeof err === "object" &&
+    err !== null &&
+    "digest" in err &&
+    typeof (err as { digest: unknown }).digest === "string" &&
+    (err as { digest: string }).digest.startsWith("NEXT_REDIRECT")
+  );
+}
 
 export default function ListingEditForm({
   userId,
@@ -30,6 +45,7 @@ export default function ListingEditForm({
     city: listing.city,
     whatsapp: listing.whatsapp,
   });
+  const { showToast } = useToast();
 
   const visibleImages = images.filter((image) => !removedIds.includes(image.id));
   const remainingSlots = Math.max(0, 5 - visibleImages.length);
@@ -46,30 +62,67 @@ export default function ListingEditForm({
     const supabase = createClient();
     const uploadedPaths: string[] = [];
 
+    console.log("[updateListing] início", { listingId: listing.id, totalFicheiros: files.length });
+
     try {
-      for (const file of files) {
+      for (const [i, file] of files.entries()) {
         const extension = file.name.split(".").pop()?.toLowerCase() || "jpg";
         const path = `${userId}/${listing.id}/${crypto.randomUUID()}.${extension}`;
 
-        const { error: uploadError } = await supabase.storage
+        console.log(`[upload ${i + 1}/${files.length}] a enviar`, {
+          path,
+          tipo: file.type,
+          tamanhoBytes: file.size,
+        });
+
+        const { data: uploadData, error: uploadError } = await supabase.storage
           .from("listings")
           .upload(path, file, { contentType: file.type });
 
         if (uploadError) {
-          throw new Error("Não foi possível enviar uma das fotos. Tente novamente.");
+          console.error(`[upload ${i + 1}/${files.length}] FALHOU`, {
+            path,
+            mensagem: uploadError.message,
+            erroCompleto: uploadError,
+          });
+          showToast(
+            "error",
+            `Falha no upload da foto ${i + 1}/${files.length}`,
+            uploadError.message
+          );
+          throw new Error(`Não foi possível enviar a foto ${i + 1}: ${uploadError.message}`);
         }
+
+        console.log(`[upload ${i + 1}/${files.length}] sucesso`, uploadData);
 
         uploadedPaths.push(path);
 
         const { data: publicUrlData } = supabase.storage.from("listings").getPublicUrl(path);
+
+        if (!publicUrlData?.publicUrl) {
+          console.error(`[getPublicUrl ${i + 1}/${files.length}] devolveu vazio`, { path });
+          showToast("error", `Não foi possível gerar o link da foto ${i + 1}`, path);
+          throw new Error(`Não foi possível gerar o link público da foto ${i + 1}.`);
+        }
+
+        console.log(`[getPublicUrl ${i + 1}/${files.length}]`, publicUrlData.publicUrl);
+
         formData.append("imageUrls", publicUrlData.publicUrl);
       }
 
       removedIds.forEach((id) => formData.append("removedImages", id));
 
+      console.log("[updateListing] a chamar a Server Action", {
+        listingId: listing.id,
+        novasImageUrls: formData.getAll("imageUrls"),
+        removedIds,
+      });
+
       const result = await updateListing(formData);
 
       if (result?.error) {
+        console.error("[updateListing] Server Action devolveu erro", result.error);
+        showToast("error", "Erro ao guardar alterações", result.error);
         setError(result.error);
         if (result.values) {
           setValues(result.values);
@@ -79,15 +132,32 @@ export default function ListingEditForm({
       // Em caso de sucesso, updateListing() chama redirect() e a navegação
       // é tratada automaticamente pelo Next.js.
     } catch (err) {
-      if (uploadedPaths.length > 0) {
-        await supabase.storage.from("listings").remove(uploadedPaths);
+      // Nunca tratar um redirect bem-sucedido (lançado pelo Next.js a
+      // partir da Server Action) como um erro de upload/atualização.
+      if (isNextRedirectError(err)) {
+        throw err;
       }
 
-      setError(
+      console.error("[updateListing] exceção capturada", err);
+
+      if (uploadedPaths.length > 0) {
+        console.log("[updateListing] a limpar imagens já enviadas", uploadedPaths);
+        const { error: removeError } = await supabase.storage
+          .from("listings")
+          .remove(uploadedPaths);
+
+        if (removeError) {
+          console.error("[updateListing] falha ao limpar imagens", removeError);
+        }
+      }
+
+      const message =
         err instanceof Error
           ? err.message
-          : "Não foi possível guardar as alterações. Tente novamente."
-      );
+          : "Não foi possível guardar as alterações. Tente novamente.";
+
+      showToast("error", "Não foi possível guardar as alterações", message);
+      setError(message);
       setPending(false);
     }
   }
@@ -115,7 +185,7 @@ export default function ListingEditForm({
                   key={image.id}
                   className="relative aspect-square overflow-hidden rounded-md border border-gray-200 bg-gray-100"
                 >
-                  <Image src={image.image_url} alt="" fill unoptimized sizes="120px" className="object-cover" />
+                  <TrackedImage src={image.image_url} alt="" fill unoptimized sizes="120px" className="object-cover" />
                   <button
                     type="button"
                     onClick={() => setRemovedIds((prev) => [...prev, image.id])}

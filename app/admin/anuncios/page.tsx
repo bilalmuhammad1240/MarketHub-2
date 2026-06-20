@@ -1,7 +1,8 @@
 import Link from "next/link";
-import Image from "next/image";
+import TrackedImage from "@/components/TrackedImage";
 import { createClient } from "@/lib/supabase/server";
 import StatusBadge from "@/components/StatusBadge";
+import QueryErrorToast from "@/components/QueryErrorToast";
 import { formatPrice, getCategoryName } from "@/lib/utils";
 import { approveListing, rejectListing, adminDeleteListing } from "@/app/admin/actions";
 import type { ListingStatus, SellerProfile } from "@/lib/types";
@@ -32,7 +33,7 @@ type AdminListingRow = {
 export default async function AdminAnunciosPage({
   searchParams,
 }: {
-  searchParams: Promise<{ status?: string; page?: string }>;
+  searchParams: Promise<{ status?: string; page?: string; actionError?: string }>;
 }) {
   const params = await searchParams;
   const status = TABS.map((tab) => tab.value).includes(
@@ -60,7 +61,18 @@ export default async function AdminAnunciosPage({
   const to = from + PAGE_SIZE - 1;
   query = query.range(from, to);
 
-  const { data, count } = await query;
+  const { data, count, error: listingsError } = await query;
+
+  if (listingsError) {
+    console.error("[AdminAnuncios/server] erro ao procurar 'listings'", {
+      code: listingsError.code,
+      message: listingsError.message,
+      details: listingsError.details,
+      hint: listingsError.hint,
+      status,
+    });
+  }
+
   const listings = (data ?? []) as unknown as AdminListingRow[];
   const total = count ?? 0;
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
@@ -75,6 +87,12 @@ export default async function AdminAnunciosPage({
 
   return (
     <div>
+      <QueryErrorToast title="Ação falhou" message={params.actionError} />
+      <QueryErrorToast
+        title="Erro ao carregar anúncios"
+        message={listingsError ? `${listingsError.code ?? "erro"}: ${listingsError.message}` : null}
+      />
+
       <h1 className="text-2xl font-bold text-primary-dark">Anúncios</h1>
 
       <div className="mt-4 flex gap-2 overflow-x-auto text-sm">
@@ -114,7 +132,7 @@ export default async function AdminAnunciosPage({
                 <div className="flex items-start gap-3">
                   <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-md bg-gray-100">
                     {cover && (
-                      <Image
+                      <TrackedImage
                         src={cover}
                         alt={listing.title}
                         fill

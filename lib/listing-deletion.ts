@@ -13,20 +13,48 @@ export async function deleteListingWithImages(
   supabase: SupabaseClient,
   listingId: string
 ): Promise<void> {
-  const { data: images } = await supabase
+  const { data: images, error: fetchError } = await supabase
     .from("listing_images")
     .select("image_url")
     .eq("listing_id", listingId);
+
+  if (fetchError) {
+    console.error("[deleteListingWithImages] erro ao procurar imagens", {
+      listingId,
+      message: fetchError.message,
+    });
+  }
 
   const paths = (images ?? [])
     .map((image: { image_url: string }) => extractStoragePath(image.image_url, BUCKET))
     .filter((path): path is string => Boolean(path));
 
   if (paths.length > 0) {
-    await supabase.storage.from(BUCKET).remove(paths);
+    const { error: removeError } = await supabase.storage.from(BUCKET).remove(paths);
+
+    if (removeError) {
+      console.error("[deleteListingWithImages] erro ao remover ficheiros do storage", {
+        listingId,
+        paths,
+        message: removeError.message,
+      });
+    } else {
+      console.log("[deleteListingWithImages] ficheiros removidos do storage", {
+        listingId,
+        total: paths.length,
+      });
+    }
   }
 
   // As linhas em "listing_images" são removidas automaticamente
   // (ON DELETE CASCADE).
-  await supabase.from("listings").delete().eq("id", listingId);
+  const { error: deleteError } = await supabase.from("listings").delete().eq("id", listingId);
+
+  if (deleteError) {
+    console.error("[deleteListingWithImages] erro ao apagar o anúncio", {
+      listingId,
+      code: deleteError.code,
+      message: deleteError.message,
+    });
+  }
 }

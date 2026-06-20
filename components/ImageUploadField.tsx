@@ -51,11 +51,19 @@ const ImageUploadField = forwardRef<ImageUploadFieldRef, Props>(function ImageUp
       if (valid.length >= remaining) break;
 
       if (!ALLOWED_TYPES.includes(file.type)) {
+        console.warn("[ImageUploadField] ficheiro rejeitado: tipo não suportado", {
+          nome: file.name,
+          tipo: file.type,
+        });
         onError?.("As fotos devem ser JPG, PNG ou WEBP.");
         continue;
       }
 
       if (file.size > MAX_SIZE_BYTES) {
+        console.warn("[ImageUploadField] ficheiro rejeitado: excede 5MB", {
+          nome: file.name,
+          tamanhoBytes: file.size,
+        });
         onError?.("Cada foto deve ter no máximo 5MB.");
         continue;
       }

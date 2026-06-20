@@ -34,10 +34,19 @@ export async function login(formData: FormData) {
   const { error } = await supabase.auth.signInWithPassword({ email, password });
 
   if (error) {
+    console.error("[login/server] signInWithPassword falhou", {
+      email,
+      code: error.code,
+      message: error.message,
+      status: error.status,
+    });
+
     const params = new URLSearchParams({ error: translateAuthError(error.message) });
     if (safeNext) params.set("next", safeNext);
     redirect(`/login?${params.toString()}`);
   }
+
+  console.log("[login/server] sucesso", { email });
 
   revalidatePath("/", "layout");
   redirect(safeNext || "/");
@@ -83,10 +92,23 @@ export async function signup(formData: FormData) {
   });
 
   if (error) {
+    console.error("[signup/server] signUp falhou", {
+      email,
+      code: error.code,
+      message: error.message,
+      status: error.status,
+    });
+
     const params = new URLSearchParams({ error: translateAuthError(error.message) });
     if (safeNext) params.set("next", safeNext);
     redirect(`/registo?${params.toString()}`);
   }
+
+  console.log("[signup/server] sucesso", {
+    email,
+    userId: data.user?.id,
+    sessaoImediata: Boolean(data.session),
+  });
 
   // Se a confirmação de email estiver desativada no projeto Supabase,
   // o signUp já devolve uma sessão ativa — entra diretamente.
@@ -100,7 +122,16 @@ export async function signup(formData: FormData) {
 
 export async function logout() {
   const supabase = await createClient();
-  await supabase.auth.signOut();
+  const { error } = await supabase.auth.signOut();
+
+  if (error) {
+    console.error("[logout/server] signOut falhou", {
+      code: error.code,
+      message: error.message,
+    });
+  } else {
+    console.log("[logout/server] sucesso");
+  }
 
   revalidatePath("/", "layout");
   redirect("/login");

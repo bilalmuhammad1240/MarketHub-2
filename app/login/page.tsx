@@ -2,6 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { login } from "@/app/auth/actions";
 import { createClient } from "@/lib/supabase/server";
+import QueryErrorToast from "@/components/QueryErrorToast";
 
 export const dynamic = "force-dynamic";
 
@@ -21,6 +22,8 @@ export default async function LoginPage({
 
   return (
     <main className="flex min-h-[calc(100vh-57px)] flex-col items-center justify-center px-6 py-12">
+      <QueryErrorToast title="Erro ao entrar" message={error} />
+
       <div className="w-full max-w-sm">
         <div className="mb-8 text-center">
           <h1 className="text-xl font-semibold text-gray-800">Entrar</h1>

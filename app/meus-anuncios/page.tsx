@@ -1,8 +1,9 @@
 import Link from "next/link";
-import Image from "next/image";
+import TrackedImage from "@/components/TrackedImage";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import StatusBadge from "@/components/StatusBadge";
+import QueryErrorToast from "@/components/QueryErrorToast";
 import DeleteListingButton from "./delete-listing-button";
 import { formatPrice } from "@/lib/utils";
 import type { ListingStatus } from "@/lib/types";
@@ -28,16 +29,31 @@ export default async function MeusAnunciosPage() {
     redirect("/login?next=/meus-anuncios");
   }
 
-  const { data: listings } = await supabase
+  const { data: listings, error: listingsError } = await supabase
     .from("listings")
     .select("id, title, price, city, status, created_at, listing_images(image_url)")
     .eq("user_id", user.id)
     .order("created_at", { ascending: false });
 
+  if (listingsError) {
+    console.error("[MeusAnuncios/server] erro ao procurar 'listings'", {
+      userId: user.id,
+      code: listingsError.code,
+      message: listingsError.message,
+      details: listingsError.details,
+      hint: listingsError.hint,
+    });
+  }
+
   const rows = (listings ?? []) as ListingRow[];
 
   return (
     <main className="mx-auto min-h-[calc(100vh-57px)] max-w-3xl px-4 py-6">
+      <QueryErrorToast
+        title="Erro ao carregar os seus anúncios"
+        message={listingsError ? `${listingsError.code ?? "erro"}: ${listingsError.message}` : null}
+      />
+
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold text-primary-dark">Os meus anúncios</h1>
         <Link
@@ -72,7 +88,7 @@ export default async function MeusAnunciosPage() {
               >
                 <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-md bg-gray-100">
                   {cover && (
-                    <Image src={cover} alt={listing.title} fill unoptimized sizes="64px" className="object-cover" />
+                    <TrackedImage src={cover} alt={listing.title} fill unoptimized sizes="64px" className="object-cover" />
                   )}
                 </div>
 

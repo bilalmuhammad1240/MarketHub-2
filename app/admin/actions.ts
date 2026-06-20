@@ -55,11 +55,33 @@ export async function approveListing(formData: FormData) {
   const supabase = await ensureAdmin();
   const listingId = String(formData.get("listingId") ?? "").trim();
 
-  await supabase.rpc("admin_set_listing_status", {
+  console.log("[approveListing/server] a aprovar", { listingId });
+
+  const { error } = await supabase.rpc("admin_set_listing_status", {
     p_listing_id: listingId,
     p_status: "approved",
     p_reason: null,
   });
+
+  if (error) {
+    console.error("[approveListing/server] RPC admin_set_listing_status falhou", {
+      listingId,
+      code: error.code,
+      message: error.message,
+      details: error.details,
+      hint: error.hint,
+    });
+
+    const href = adminAnunciosHref(formData);
+    const separator = href.includes("?") ? "&" : "?";
+    redirect(
+      `${href}${separator}actionError=${encodeURIComponent(
+        `Não foi possível aprovar (${error.code ?? "erro"}): ${error.message}`
+      )}`
+    );
+  }
+
+  console.log("[approveListing/server] aprovado com sucesso", { listingId });
 
   revalidateListingPaths(listingId);
   redirect(adminAnunciosHref(formData));
@@ -70,11 +92,33 @@ export async function rejectListing(formData: FormData) {
   const listingId = String(formData.get("listingId") ?? "").trim();
   const reason = String(formData.get("reason") ?? "").trim().slice(0, 200) || null;
 
-  await supabase.rpc("admin_set_listing_status", {
+  console.log("[rejectListing/server] a rejeitar", { listingId, reason });
+
+  const { error } = await supabase.rpc("admin_set_listing_status", {
     p_listing_id: listingId,
     p_status: "rejected",
     p_reason: reason,
   });
+
+  if (error) {
+    console.error("[rejectListing/server] RPC admin_set_listing_status falhou", {
+      listingId,
+      code: error.code,
+      message: error.message,
+      details: error.details,
+      hint: error.hint,
+    });
+
+    const href = adminAnunciosHref(formData);
+    const separator = href.includes("?") ? "&" : "?";
+    redirect(
+      `${href}${separator}actionError=${encodeURIComponent(
+        `Não foi possível rejeitar (${error.code ?? "erro"}): ${error.message}`
+      )}`
+    );
+  }
+
+  console.log("[rejectListing/server] rejeitado com sucesso", { listingId });
 
   revalidateListingPaths(listingId);
   redirect(adminAnunciosHref(formData));
@@ -84,7 +128,11 @@ export async function adminDeleteListing(formData: FormData) {
   const supabase = await ensureAdmin();
   const listingId = String(formData.get("listingId") ?? "").trim();
 
+  console.log("[adminDeleteListing/server] a eliminar", { listingId });
+
   await deleteListingWithImages(supabase, listingId);
+
+  console.log("[adminDeleteListing/server] eliminado", { listingId });
 
   revalidateListingPaths(listingId);
   redirect(adminAnunciosHref(formData));

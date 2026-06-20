@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
+import QueryErrorToast from "@/components/QueryErrorToast";
 
 export const dynamic = "force-dynamic";
 
@@ -27,11 +28,20 @@ export default async function AdminUtilizadoresPage({
   const from = (page - 1) * PAGE_SIZE;
   const to = from + PAGE_SIZE - 1;
 
-  const { data, count } = await supabase
+  const { data, count, error: profilesError } = await supabase
     .from("profiles")
     .select("id, name, email, city, role, created_at", { count: "exact" })
     .order("created_at", { ascending: false })
     .range(from, to);
+
+  if (profilesError) {
+    console.error("[AdminUtilizadores/server] erro ao procurar 'profiles'", {
+      code: profilesError.code,
+      message: profilesError.message,
+      details: profilesError.details,
+      hint: profilesError.hint,
+    });
+  }
 
   const users = (data ?? []) as UserRow[];
   const total = count ?? 0;
@@ -39,13 +49,20 @@ export default async function AdminUtilizadoresPage({
 
   let listingCounts: Record<string, number> = {};
   if (users.length > 0) {
-    const { data: listingRows } = await supabase
+    const { data: listingRows, error: listingsError } = await supabase
       .from("listings")
       .select("user_id")
       .in(
         "user_id",
         users.map((u) => u.id)
       );
+
+    if (listingsError) {
+      console.error("[AdminUtilizadores/server] erro ao procurar 'listings' (contagem)", {
+        code: listingsError.code,
+        message: listingsError.message,
+      });
+    }
 
     listingCounts = (listingRows ?? []).reduce<Record<string, number>>((acc, row) => {
       const userId = String(row.user_id);
@@ -56,6 +73,11 @@ export default async function AdminUtilizadoresPage({
 
   return (
     <div>
+      <QueryErrorToast
+        title="Erro ao carregar utilizadores"
+        message={profilesError ? `${profilesError.code ?? "erro"}: ${profilesError.message}` : null}
+      />
+
       <h1 className="text-2xl font-bold text-primary-dark">Utilizadores</h1>
       <p className="mt-1 text-sm text-gray-500">
         {total === 1 ? "1 utilizador registado" : `${total} utilizadores registados`}

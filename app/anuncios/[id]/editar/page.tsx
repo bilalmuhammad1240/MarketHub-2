@@ -20,13 +20,23 @@ export default async function EditarAnuncioPage({
     redirect(`/login?next=/anuncios/${id}/editar`);
   }
 
-  const { data: listing } = await supabase
+  const { data: listing, error: listingError } = await supabase
     .from("listings")
     .select(
       "id, user_id, title, description, price, category, city, whatsapp, status, created_at, listing_images(id, listing_id, image_url, created_at)"
     )
     .eq("id", id)
     .single();
+
+  if (listingError) {
+    console.error("[EditarAnuncio/server] erro ao procurar 'listings'", {
+      id,
+      code: listingError.code,
+      message: listingError.message,
+      details: listingError.details,
+      hint: listingError.hint,
+    });
+  }
 
   if (!listing || listing.user_id !== user.id) {
     notFound();

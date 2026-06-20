@@ -2,6 +2,7 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { CATEGORIES } from "@/lib/constants";
 import ListingCard from "@/components/ListingCard";
+import QueryErrorToast from "@/components/QueryErrorToast";
 import type { ListingWithImages } from "@/lib/types";
 
 // Evita que esta página fique presa em cache estático entre deploys —
@@ -13,7 +14,7 @@ export default async function Home() {
   const { data: userData } = await supabase.auth.getUser();
   const user = userData.user;
 
-  const { data: listings } = await supabase
+  const { data: listings, error: listingsError } = await supabase
     .from("listings")
     .select(
       "id, user_id, title, description, price, category, city, whatsapp, status, created_at, listing_images(id, listing_id, image_url, created_at)"
@@ -22,10 +23,24 @@ export default async function Home() {
     .order("created_at", { ascending: false })
     .limit(8);
 
+  if (listingsError) {
+    console.error("[Home/server] erro ao procurar 'listings'", {
+      code: listingsError.code,
+      message: listingsError.message,
+      details: listingsError.details,
+      hint: listingsError.hint,
+    });
+  }
+
   const recentListings = (listings ?? []) as ListingWithImages[];
 
   return (
     <main className="mx-auto min-h-[calc(100vh-57px)] max-w-5xl px-4 py-8">
+      <QueryErrorToast
+        title="Erro ao carregar anúncios"
+        message={listingsError ? `${listingsError.code ?? "erro"}: ${listingsError.message}` : null}
+      />
+
       <section className="rounded-lg bg-primary-dark px-6 py-10 text-center text-white">
         <h1 className="text-2xl font-bold sm:text-3xl">
           Compre, venda e anuncie em Moçambique

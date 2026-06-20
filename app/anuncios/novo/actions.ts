@@ -40,24 +40,37 @@ export async function createListing(formData: FormData): Promise<ListingActionSt
     whatsapp,
   };
 
+  console.log("[createListing/server] payload recebido", {
+    userId: user.id,
+    title,
+    category,
+    city,
+    totalImageUrls: formData.getAll("imageUrls").length,
+  });
+
   if (!title || !description || !priceRaw || !category || !city || !whatsapp) {
+    console.warn("[createListing/server] validação falhou: campos em falta", values);
     return { error: "Preencha todos os campos obrigatórios.", values };
   }
 
   const price = Number(priceRaw);
   if (!Number.isFinite(price) || price < 0) {
+    console.warn("[createListing/server] validação falhou: preço inválido", { priceRaw });
     return { error: "Indique um preço válido.", values };
   }
 
   if (!CATEGORY_SLUGS.includes(category)) {
+    console.warn("[createListing/server] validação falhou: categoria inválida", { category });
     return { error: "Selecione uma categoria válida.", values };
   }
 
   if (!(MOZAMBIQUE_CITIES as readonly string[]).includes(city)) {
+    console.warn("[createListing/server] validação falhou: cidade inválida", { city });
     return { error: "Selecione uma cidade válida.", values };
   }
 
   if (!isValidMozambiquePhone(whatsapp)) {
+    console.warn("[createListing/server] validação falhou: whatsapp inválido", { whatsapp });
     return {
       error: "Indique um número de WhatsApp válido (ex: 84xxxxxxx).",
       values,
@@ -100,14 +113,25 @@ export async function createListing(formData: FormData): Promise<ListingActionSt
     .single();
 
   if (insertError || !listing) {
-    console.error("createListing insert error:", insertError);
+    // Isto aparece sempre nos logs do servidor (terminal em "npm run dev",
+    // ou Vercel > o seu projeto > Logs / Runtime Logs em produção).
+    console.error("[createListing/server] erro ao inserir em 'listings'", {
+      code: insertError?.code,
+      message: insertError?.message,
+      details: insertError?.details,
+      hint: insertError?.hint,
+      payload: insertPayload,
+    });
+
     return {
       error: insertError
-        ? `Não foi possível publicar o anúncio: ${insertError.message}`
+        ? `Não foi possível publicar o anúncio (${insertError.code ?? "erro"}): ${insertError.message}`
         : "Não foi possível publicar o anúncio. Tente novamente.",
       values,
     };
   }
+
+  console.log("[createListing/server] anúncio criado com sucesso", { listingId: listing.id });
 
   if (imageUrls.length > 0) {
     const { error: imagesError } = await supabase.from("listing_images").insert(
@@ -118,8 +142,32 @@ export async function createListing(formData: FormData): Promise<ListingActionSt
     );
 
     if (imagesError) {
-      console.error("createListing: erro ao inserir em 'listing_images'", imagesError);
+      // Esta é a causa mais provável de "anúncio publicado mas sem foto":
+      // o registo em "listings" tem sucesso, mas a ligação das imagens em
+      // "listing_images" falha (RLS, FK, etc.) e ficava silenciosa antes
+      // desta alteração. Agora propagamos o erro de forma visível.
+      console.error("[createListing/server] erro ao inserir em 'listing_images'", {
+        code: imagesError.code,
+        message: imagesError.message,
+        details: imagesError.details,
+        hint: imagesError.hint,
+        listingId: listing.id,
+        imageUrls,
+      });
+
+      revalidatePath("/");
+      revalidatePath("/meus-anuncios");
+      redirect(
+        `/anuncios/${listing.id}?created=1&imageError=${encodeURIComponent(
+          `As fotos não foram guardadas (${imagesError.code ?? "erro"}): ${imagesError.message}`
+        )}`
+      );
     }
+
+    console.log("[createListing/server] imagens associadas com sucesso", {
+      listingId: listing.id,
+      total: imageUrls.length,
+    });
   }
 
   revalidatePath("/");

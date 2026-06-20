@@ -4,6 +4,7 @@ import { CATEGORIES, MOZAMBIQUE_CITIES } from "@/lib/constants";
 import { getCategoryName, sanitizeSearchTerm } from "@/lib/utils";
 import SearchFilters from "@/components/SearchFilters";
 import ListingCard from "@/components/ListingCard";
+import QueryErrorToast from "@/components/QueryErrorToast";
 import type { ListingWithImages } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
@@ -72,7 +73,17 @@ export default async function AnunciosPage({
   const to = from + PAGE_SIZE - 1;
   query = query.range(from, to);
 
-  const { data: listings, count } = await query;
+  const { data: listings, count, error: searchError } = await query;
+
+  if (searchError) {
+    console.error("[AnunciosSearch/server] erro na pesquisa de 'listings'", {
+      code: searchError.code,
+      message: searchError.message,
+      details: searchError.details,
+      hint: searchError.hint,
+      filtros: { q, categoria, cidade, ordenar, page },
+    });
+  }
 
   const results = (listings ?? []) as ListingWithImages[];
   const total = count ?? 0;
@@ -103,6 +114,11 @@ export default async function AnunciosPage({
 
   return (
     <main className="mx-auto min-h-[calc(100vh-57px)] max-w-5xl px-4 py-6">
+      <QueryErrorToast
+        title="Erro na pesquisa"
+        message={searchError ? `${searchError.code ?? "erro"}: ${searchError.message}` : null}
+      />
+
       <h1 className="text-2xl font-bold text-primary-dark">{title}</h1>
 
       <div className="mt-4">

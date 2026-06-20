@@ -11,11 +11,19 @@ export default async function Header() {
   let isAdmin = false;
 
   if (user) {
-    const { data: profile } = await supabase
+    const { data: profile, error: profileError } = await supabase
       .from("profiles")
       .select("name, role")
       .eq("id", user.id)
       .single();
+
+    if (profileError) {
+      console.error("[Header/server] erro ao procurar perfil", {
+        userId: user.id,
+        code: profileError.code,
+        message: profileError.message,
+      });
+    }
 
     displayName = profile?.name ?? user.email ?? "Conta";
     isAdmin = profile?.role === "admin";

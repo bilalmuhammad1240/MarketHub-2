@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import Image from "next/image";
+import TrackedImage from "./TrackedImage";
 import type { ListingImage } from "@/lib/types";
 
 export default function ImageCarousel({ images }: { images: ListingImage[] }) {
@@ -25,7 +25,7 @@ export default function ImageCarousel({ images }: { images: ListingImage[] }) {
 
   return (
     <div className="relative aspect-square w-full overflow-hidden rounded-lg bg-gray-100 sm:aspect-video">
-      <Image
+      <TrackedImage
         src={images[index].image_url}
         alt=""
         fill

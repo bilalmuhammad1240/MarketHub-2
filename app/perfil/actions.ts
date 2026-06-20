@@ -21,17 +21,31 @@ export async function updateProfile(formData: FormData) {
     redirect("/perfil?error=" + encodeURIComponent("Preencha todos os campos."));
   }
 
+  console.log("[updateProfile/server] a guardar", { userId: user.id, name, phone, city });
+
   const { error } = await supabase
     .from("profiles")
     .update({ name, phone, city })
     .eq("id", user.id);
 
   if (error) {
+    console.error("[updateProfile/server] erro ao atualizar 'profiles'", {
+      userId: user.id,
+      code: error.code,
+      message: error.message,
+      details: error.details,
+      hint: error.hint,
+    });
+
     redirect(
       "/perfil?error=" +
-        encodeURIComponent("Não foi possível guardar as alterações. Tente novamente.")
+        encodeURIComponent(
+          `Não foi possível guardar as alterações (${error.code ?? "erro"}): ${error.message}`
+        )
     );
   }
+
+  console.log("[updateProfile/server] sucesso", { userId: user.id });
 
   revalidatePath("/perfil");
   revalidatePath("/", "layout");

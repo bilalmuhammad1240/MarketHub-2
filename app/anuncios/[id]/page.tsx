@@ -3,6 +3,7 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import ImageCarousel from "@/components/ImageCarousel";
 import StatusBadge from "@/components/StatusBadge";
+import QueryErrorToast from "@/components/QueryErrorToast";
 import { formatPrice, getCategoryName, whatsappLink } from "@/lib/utils";
 import type { ListingImage, ListingStatus, SellerProfile } from "@/lib/types";
 
@@ -14,22 +15,35 @@ export const dynamic = "force-dynamic";
 
 export default async function AnuncioPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ imageError?: string }>;
 }) {
   const { id } = await params;
+  const { imageError } = await searchParams;
   const supabase = await createClient();
 
   const { data: userData } = await supabase.auth.getUser();
   const user = userData.user;
 
-  const { data: listing } = await supabase
+  const { data: listing, error: listingError } = await supabase
     .from("listings")
     .select(
       "id, user_id, title, description, price, category, city, whatsapp, status, rejection_reason, created_at, listing_images(id, listing_id, image_url, created_at), profiles(name)"
     )
     .eq("id", id)
     .single();
+
+  if (listingError) {
+    console.error("[AnuncioPage/server] erro ao procurar 'listings'", {
+      id,
+      code: listingError.code,
+      message: listingError.message,
+      details: listingError.details,
+      hint: listingError.hint,
+    });
+  }
 
   if (!listing) {
     notFound();
@@ -44,13 +58,6 @@ export default async function AnuncioPage({
   }
 
   const images = (listing.listing_images ?? []) as ListingImage[];
-  
-
-console.log("LISTING:", listing);
-console.log("IMAGES:", images);
-console.log("PROFILES:", listing.profiles);
-
-
   const status = listing.status as ListingStatus;
 
   // O supabase-js infere "profiles" como array (sem tipos gerados do
@@ -67,6 +74,8 @@ console.log("PROFILES:", listing.profiles);
 
   return (
     <main className="mx-auto min-h-[calc(100vh-57px)] max-w-3xl px-4 py-6">
+      <QueryErrorToast title="As fotos do anúncio não foram guardadas" message={imageError} />
+
       {isOwner && status !== "approved" && (
         <div className="mb-4 rounded-md border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
           <div className="flex items-center justify-between gap-3">

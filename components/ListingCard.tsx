@@ -1,8 +1,7 @@
 import Link from "next/link";
-import Image from "next/image";
+import TrackedImage from "./TrackedImage";
 import { formatPrice } from "@/lib/utils";
 import type { ListingWithImages } from "@/lib/types";
-
 
 export default function ListingCard({ listing }: { listing: ListingWithImages }) {
   const cover = listing.listing_images?.[0]?.image_url;
@@ -14,7 +13,7 @@ export default function ListingCard({ listing }: { listing: ListingWithImages })
     >
       <div className="relative aspect-square w-full bg-gray-100">
         {cover ? (
-          <Image
+          <TrackedImage
             src={cover}
             alt={listing.title}
             fill
@@ -39,5 +38,3 @@ export default function ListingCard({ listing }: { listing: ListingWithImages })
     </Link>
   );
 }
-
-

@@ -44,6 +44,13 @@ export default async function AnuncioPage({
   }
 
   const images = (listing.listing_images ?? []) as ListingImage[];
+  
+
+console.log("LISTING:", listing);
+console.log("IMAGES:", images);
+console.log("PROFILES:", listing.profiles);
+
+
   const status = listing.status as ListingStatus;
 
   // O supabase-js infere "profiles" como array (sem tipos gerados do

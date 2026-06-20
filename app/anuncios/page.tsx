@@ -6,6 +6,8 @@ import SearchFilters from "@/components/SearchFilters";
 import ListingCard from "@/components/ListingCard";
 import type { ListingWithImages } from "@/lib/types";
 
+export const dynamic = "force-dynamic";
+
 const PAGE_SIZE = 12;
 
 const CATEGORY_SLUGS: readonly string[] = CATEGORIES.map((category) => category.slug);

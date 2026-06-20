@@ -7,6 +7,8 @@ import DeleteListingButton from "./delete-listing-button";
 import { formatPrice } from "@/lib/utils";
 import type { ListingStatus } from "@/lib/types";
 
+export const dynamic = "force-dynamic";
+
 type ListingRow = {
   id: string;
   title: string;

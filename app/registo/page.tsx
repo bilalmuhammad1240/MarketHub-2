@@ -4,6 +4,8 @@ import { signup } from "@/app/auth/actions";
 import { createClient } from "@/lib/supabase/server";
 import { MOZAMBIQUE_CITIES } from "@/lib/constants";
 
+export const dynamic = "force-dynamic";
+
 export default async function RegistoPage({
   searchParams,
 }: {

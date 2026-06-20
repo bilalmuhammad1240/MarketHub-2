@@ -3,6 +3,8 @@ import { createClient } from "@/lib/supabase/server";
 import ListingEditForm from "./listing-edit-form";
 import type { Listing, ListingImage } from "@/lib/types";
 
+export const dynamic = "force-dynamic";
+
 export default async function EditarAnuncioPage({
   params,
 }: {

@@ -3,6 +3,8 @@ import { redirect } from "next/navigation";
 import { login } from "@/app/auth/actions";
 import { createClient } from "@/lib/supabase/server";
 
+export const dynamic = "force-dynamic";
+
 export default async function LoginPage({
   searchParams,
 }: {

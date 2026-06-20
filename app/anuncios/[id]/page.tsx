@@ -6,6 +6,12 @@ import StatusBadge from "@/components/StatusBadge";
 import { formatPrice, getCategoryName, whatsappLink } from "@/lib/utils";
 import type { ListingImage, ListingStatus, SellerProfile } from "@/lib/types";
 
+// Força esta página a ser sempre renderizada no servidor a cada pedido.
+// Sem isto, o Next.js pode tratar esta rota como estática/em cache, e o
+// conteúdo (incluindo fotos e estado do anúncio) não atualiza entre
+// deploys nem quando o anúncio muda.
+export const dynamic = "force-dynamic";
+
 export default async function AnuncioPage({
   params,
 }: {

@@ -6,6 +6,8 @@ import { formatPrice, getCategoryName } from "@/lib/utils";
 import { approveListing, rejectListing, adminDeleteListing } from "@/app/admin/actions";
 import type { ListingStatus, SellerProfile } from "@/lib/types";
 
+export const dynamic = "force-dynamic";
+
 const PAGE_SIZE = 20;
 const TABS = [
   { value: "pending", label: "Pendentes" },

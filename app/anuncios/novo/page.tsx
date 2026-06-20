@@ -2,6 +2,8 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import ListingForm from "./listing-form";
 
+export const dynamic = "force-dynamic";
+
 export default async function NovoAnuncioPage() {
   const supabase = await createClient();
   const { data: userData } = await supabase.auth.getUser();

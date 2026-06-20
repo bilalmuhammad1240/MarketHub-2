@@ -4,6 +4,10 @@ import { CATEGORIES } from "@/lib/constants";
 import ListingCard from "@/components/ListingCard";
 import type { ListingWithImages } from "@/lib/types";
 
+// Evita que esta página fique presa em cache estático entre deploys —
+// "Últimos anúncios" precisa de refletir sempre o estado atual da BD.
+export const dynamic = "force-dynamic";
+
 export default async function Home() {
   const supabase = await createClient();
   const { data: userData } = await supabase.auth.getUser();

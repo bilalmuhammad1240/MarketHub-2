@@ -18,6 +18,7 @@ export default function ListingCard({ listing }: { listing: ListingWithImages })
             src={cover}
             alt={listing.title}
             fill
+            unoptimized
             sizes="(max-width: 640px) 50vw, 25vw"
             className="object-cover transition group-hover:scale-105"
           />

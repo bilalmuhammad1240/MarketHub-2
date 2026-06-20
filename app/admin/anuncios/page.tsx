@@ -116,6 +116,7 @@ export default async function AdminAnunciosPage({
                         src={cover}
                         alt={listing.title}
                         fill
+                        unoptimized
                         sizes="64px"
                         className="object-cover"
                       />

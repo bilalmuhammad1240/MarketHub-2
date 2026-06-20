@@ -115,7 +115,7 @@ export default function ListingEditForm({
                   key={image.id}
                   className="relative aspect-square overflow-hidden rounded-md border border-gray-200 bg-gray-100"
                 >
-                  <Image src={image.image_url} alt="" fill sizes="120px" className="object-cover" />
+                  <Image src={image.image_url} alt="" fill unoptimized sizes="120px" className="object-cover" />
                   <button
                     type="button"
                     onClick={() => setRemovedIds((prev) => [...prev, image.id])}

@@ -70,7 +70,7 @@ export default async function MeusAnunciosPage() {
               >
                 <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-md bg-gray-100">
                   {cover && (
-                    <Image src={cover} alt={listing.title} fill sizes="64px" className="object-cover" />
+                    <Image src={cover} alt={listing.title} fill unoptimized sizes="64px" className="object-cover" />
                   )}
                 </div>
 

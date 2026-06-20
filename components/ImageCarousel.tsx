@@ -29,6 +29,7 @@ export default function ImageCarousel({ images }: { images: ListingImage[] }) {
         src={images[index].image_url}
         alt=""
         fill
+        unoptimized
         sizes="(max-width: 768px) 100vw, 768px"
         className="object-cover"
         priority

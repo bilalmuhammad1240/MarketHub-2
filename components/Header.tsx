@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
-import LogoutButton from "@/components/LogoutButton";
+import AccountMenu from "@/components/AccountMenu";
 
 export default async function Header() {
   const supabase = await createClient();
@@ -31,16 +31,16 @@ export default async function Header() {
 
   return (
     <header className="sticky top-0 z-10 border-b border-gray-200 bg-white">
-      <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-3">
-        <Link href="/" className="text-lg font-bold text-primary-dark">
+      <div className="mx-auto flex max-w-5xl items-center justify-between gap-2 px-4 py-3">
+        <Link href="/" className="shrink-0 text-lg font-bold text-primary-dark">
           MozMarketHub
         </Link>
 
-        <nav className="flex items-center gap-2 text-sm sm:gap-3">
+        <nav className="flex items-center gap-1 sm:gap-2">
           <Link
             href="/anuncios"
             aria-label="Pesquisar anúncios"
-            className="flex h-9 w-9 items-center justify-center rounded-md text-gray-500 hover:bg-gray-100 hover:text-primary-dark"
+            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md text-gray-500 hover:bg-gray-100 hover:text-primary-dark"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -59,39 +59,25 @@ export default async function Header() {
 
           {user ? (
             <>
-              {isAdmin && (
-                <Link
-                  href="/admin"
-                  className="rounded-md border border-primary-dark px-3 py-2 text-xs font-semibold text-primary-dark hover:bg-primary-dark hover:text-white sm:text-sm"
-                >
-                  Admin
-                </Link>
-              )}
               <Link
                 href="/anuncios/novo"
-                className="rounded-md bg-primary px-3 py-2 text-xs font-semibold text-white hover:bg-primary-dark sm:text-sm"
+                className="shrink-0 rounded-md bg-primary px-3 py-2 text-xs font-semibold text-white hover:bg-primary-dark sm:text-sm"
               >
                 Publicar
               </Link>
-              <Link
-                href="/perfil"
-                className="max-w-[64px] truncate text-xs font-medium text-gray-700 hover:text-primary-dark sm:max-w-[120px] sm:text-sm"
-              >
-                {displayName}
-              </Link>
-              <LogoutButton />
+              <AccountMenu displayName={displayName ?? "Conta"} isAdmin={isAdmin} />
             </>
           ) : (
             <>
               <Link
                 href="/login"
-                className="font-medium text-gray-700 hover:text-primary-dark"
+                className="shrink-0 px-2 text-sm font-medium text-gray-700 hover:text-primary-dark"
               >
                 Entrar
               </Link>
               <Link
                 href="/registo"
-                className="rounded-md bg-primary px-3 py-2 font-semibold text-white hover:bg-primary-dark"
+                className="shrink-0 rounded-md bg-primary px-3 py-2 text-sm font-semibold text-white hover:bg-primary-dark"
               >
                 Registar
               </Link>
@@ -102,3 +88,4 @@ export default async function Header() {
     </header>
   );
 }
+

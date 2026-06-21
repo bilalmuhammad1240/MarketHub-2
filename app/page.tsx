@@ -68,31 +68,22 @@ export default async function Home() {
           </button>
         </form>
 
-        <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:justify-center">
-          {user ? (
+        {!user && (
+          <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:justify-center">
             <Link
-              href="/anuncios/novo"
+              href="/registo"
               className="rounded-md bg-primary px-6 py-3 text-sm font-semibold text-white hover:bg-primary/90"
             >
-              Publicar anúncio
+              Criar conta gratuita
             </Link>
-          ) : (
-            <>
-              <Link
-                href="/registo"
-                className="rounded-md bg-primary px-6 py-3 text-sm font-semibold text-white hover:bg-primary/90"
-              >
-                Criar conta gratuita
-              </Link>
-              <Link
-                href="/login"
-                className="rounded-md border border-white px-6 py-3 text-sm font-semibold text-white hover:bg-white/10"
-              >
-                Entrar
-              </Link>
-            </>
-          )}
-        </div>
+            <Link
+              href="/login"
+              className="rounded-md border border-white px-6 py-3 text-sm font-semibold text-white hover:bg-white/10"
+            >
+              Entrar
+            </Link>
+          </div>
+        )}
       </section>
 
       <section className="mt-8">

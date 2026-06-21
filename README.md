@@ -285,3 +285,4 @@ melhorias futuras (fora do MVP, especificação seção 12): pagamentos
 M-Pesa/e-Mola, anúncios em destaque, apps móveis, sistema de reputação.
 
 
+# Txatini

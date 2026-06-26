@@ -35,17 +35,21 @@ export default async function Header() {
 
   return (
     <header className="sticky top-0 z-10 border-b border-gray-200 bg-white">
-      <div className="mx-auto flex max-w-5xl items-center justify-between gap-2 px-4 py-3">
+      {/* h-14 fixo — nunca muda de altura independentemente do conteúdo */}
+      <div className="mx-auto flex h-14 max-w-5xl items-center justify-between gap-2 px-4">
         <Link href="/" className="flex shrink-0 items-center gap-2">
           {settings.logo_url ? (
-            <Image
-              src={settings.logo_url}
-              alt={settings.site_name}
-              width={100}
-              height={32}
-              unoptimized
-              className="h-8 w-auto object-contain"
-            />
+            /* Dimensões explícitas reservam espaço antes da imagem carregar */
+            <div className="relative h-8 w-[100px] shrink-0">
+              <Image
+                src={settings.logo_url}
+                alt={settings.site_name}
+                fill
+                unoptimized
+                priority
+                className="object-contain object-left"
+              />
+            </div>
           ) : (
             <span className="text-lg font-bold text-primary-dark">
               {settings.site_name}
@@ -53,7 +57,7 @@ export default async function Header() {
           )}
         </Link>
 
-        <nav className="flex items-center gap-1 sm:gap-2">
+        <nav className="flex shrink-0 items-center gap-1 sm:gap-2">
           <Link
             href="/anuncios"
             aria-label="Pesquisar anúncios"

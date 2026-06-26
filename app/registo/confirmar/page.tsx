@@ -10,7 +10,7 @@ export default async function ConfirmarRegistoPage({
   const loginHref = safeNext ? `/login?next=${encodeURIComponent(safeNext)}` : "/login";
 
   return (
-    <main className="flex min-h-[calc(100vh-57px)] flex-col items-center justify-center px-6 text-center">
+    <main className="flex min-h-[calc(100vh-56px)] flex-col items-center justify-center px-6 text-center">
       <h1 className="text-2xl font-bold text-primary-dark">Confirme o seu email</h1>
       <p className="mt-3 max-w-sm text-gray-600">
         Enviámos um link de confirmação para o seu email. Abra a sua caixa de

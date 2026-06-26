@@ -30,17 +30,18 @@ export default function AccountMenu({
 
   return (
     <div ref={containerRef} className="relative">
+      {/* Altura fixa h-9 garante que o trigger nunca muda o tamanho do header */}
       <button
         type="button"
         onClick={() => setOpen((prev) => !prev)}
         aria-expanded={open}
         aria-haspopup="menu"
-        className="flex items-center gap-1.5 rounded-md py-2 pl-2 pr-1 text-sm font-medium text-gray-700 hover:bg-gray-100"
+        className="flex h-9 items-center gap-1.5 rounded-md pl-2 pr-1 text-sm font-medium text-gray-700 hover:bg-gray-100"
       >
-        <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-bold text-primary-dark">
+        <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-bold text-primary-dark">
           {displayName.charAt(0).toUpperCase()}
         </span>
-        <span className="max-w-[88px] truncate sm:max-w-[140px]">{displayName}</span>
+        <span className="hidden max-w-[100px] truncate sm:block">{displayName}</span>
         <svg
           xmlns="http://www.w3.org/2000/svg"
           viewBox="0 0 24 24"
@@ -55,44 +56,46 @@ export default function AccountMenu({
         </svg>
       </button>
 
+      {/* position:absolute com top/right — flutua fora do fluxo, nunca empurra conteúdo */}
       {open && (
         <div
           role="menu"
-          className="absolute right-0 top-full z-20 mt-1 w-48 overflow-hidden rounded-lg border border-gray-200 bg-white py-1 shadow-lg"
+          className="absolute right-0 top-full z-50 mt-1 w-52 overflow-hidden rounded-lg border border-gray-200 bg-white py-1 shadow-xl"
         >
           <Link
             href="/perfil"
             role="menuitem"
             onClick={() => setOpen(false)}
-            className="block px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50"
+            className="flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50"
           >
-            O meu perfil
+            <span className="text-base">👤</span> O meu perfil
           </Link>
           <Link
             href="/meus-anuncios"
             role="menuitem"
             onClick={() => setOpen(false)}
-            className="block px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50"
+            className="flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50"
           >
-            Os meus anúncios
+            <span className="text-base">📋</span> Os meus anúncios
           </Link>
           {isAdmin && (
             <>
+              <div className="my-1 border-t border-gray-100" />
               <Link
                 href="/admin"
                 role="menuitem"
                 onClick={() => setOpen(false)}
-                className="block px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50"
+                className="flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50"
               >
-                Painel admin
+                <span className="text-base">🛠️</span> Painel admin
               </Link>
               <Link
                 href="/admin/configuracoes"
                 role="menuitem"
                 onClick={() => setOpen(false)}
-                className="block px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50"
+                className="flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50"
               >
-                Configurações
+                <span className="text-base">⚙️</span> Configurações
               </Link>
             </>
           )}
@@ -101,9 +104,9 @@ export default function AccountMenu({
             <button
               type="submit"
               role="menuitem"
-              className="block w-full px-4 py-2.5 text-left text-sm font-medium text-red-600 hover:bg-red-50"
+              className="flex w-full items-center gap-2 px-4 py-2.5 text-left text-sm font-medium text-red-600 hover:bg-red-50"
             >
-              Sair
+              <span className="text-base">🚪</span> Sair
             </button>
           </form>
         </div>

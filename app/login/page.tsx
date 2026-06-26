@@ -21,7 +21,7 @@ export default async function LoginPage({
   }
 
   return (
-    <main className="flex min-h-[calc(100vh-57px)] flex-col items-center justify-center px-6 py-12">
+    <main className="flex min-h-[calc(100vh-56px)] flex-col items-center justify-center px-6 py-12">
       <QueryErrorToast title="Erro ao entrar" message={error} />
 
       <div className="w-full max-w-sm">

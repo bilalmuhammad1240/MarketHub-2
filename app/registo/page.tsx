@@ -22,7 +22,7 @@ export default async function RegistoPage({
   }
 
   return (
-    <main className="flex min-h-[calc(100vh-57px)] flex-col items-center justify-center px-6 py-12">
+    <main className="flex min-h-[calc(100vh-56px)] flex-col items-center justify-center px-6 py-12">
       <div className="w-full max-w-sm">
         <div className="mb-8 text-center">
           <h1 className="text-xl font-semibold text-gray-800">Criar conta</h1>

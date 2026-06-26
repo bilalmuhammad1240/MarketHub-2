@@ -48,7 +48,7 @@ export default async function MeusAnunciosPage() {
   const rows = (listings ?? []) as ListingRow[];
 
   return (
-    <main className="mx-auto min-h-[calc(100vh-57px)] max-w-3xl px-4 py-6">
+    <main className="mx-auto min-h-[calc(100vh-56px)] max-w-3xl px-4 py-6">
       <QueryErrorToast
         title="Erro ao carregar os seus anúncios"
         message={listingsError ? `${listingsError.code ?? "erro"}: ${listingsError.message}` : null}

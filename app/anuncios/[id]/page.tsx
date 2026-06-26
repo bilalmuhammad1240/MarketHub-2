@@ -73,7 +73,7 @@ export default async function AnuncioPage({
   );
 
   return (
-    <main className="mx-auto min-h-[calc(100vh-57px)] max-w-3xl px-4 py-6">
+    <main className="mx-auto min-h-[calc(100vh-56px)] max-w-3xl px-4 py-6">
       <QueryErrorToast title="As fotos do anúncio não foram guardadas" message={imageError} />
 
       {isOwner && status !== "approved" && (

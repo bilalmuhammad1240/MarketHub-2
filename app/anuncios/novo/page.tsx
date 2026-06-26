@@ -20,7 +20,7 @@ export default async function NovoAnuncioPage() {
     .single();
 
   return (
-    <main className="mx-auto min-h-[calc(100vh-57px)] max-w-lg px-6 py-8">
+    <main className="mx-auto min-h-[calc(100vh-56px)] max-w-lg px-6 py-8">
       <h1 className="text-2xl font-bold text-primary-dark">Publicar anúncio</h1>
       <p className="mt-1 text-sm text-gray-500">
         Depois de publicado, o seu anúncio fica em revisão antes de aparecer

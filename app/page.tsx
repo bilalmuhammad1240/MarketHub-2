@@ -38,7 +38,7 @@ export default async function Home() {
   const recentListings = (listings ?? []) as ListingWithImages[];
 
   return (
-    <main className="min-h-[calc(100vh-57px)]">
+    <main className="min-h-[calc(100vh-56px)]">
       <QueryErrorToast
         title="Erro ao carregar anúncios"
         message={listingsError ? `${listingsError.code ?? "erro"}: ${listingsError.message}` : null}

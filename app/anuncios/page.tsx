@@ -113,7 +113,7 @@ export default async function AnunciosPage({
   }
 
   return (
-    <main className="mx-auto min-h-[calc(100vh-57px)] max-w-5xl px-4 py-6">
+    <main className="mx-auto min-h-[calc(100vh-56px)] max-w-5xl px-4 py-6">
       <QueryErrorToast
         title="Erro na pesquisa"
         message={searchError ? `${searchError.code ?? "erro"}: ${searchError.message}` : null}

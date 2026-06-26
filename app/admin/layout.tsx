@@ -9,7 +9,7 @@ export default async function AdminLayout({
   await requireAdmin();
 
   return (
-    <main className="mx-auto min-h-[calc(100vh-57px)] max-w-5xl px-4 py-6">
+    <main className="mx-auto min-h-[calc(100vh-56px)] max-w-5xl px-4 py-6">
       <nav className="mb-6 flex gap-4 overflow-x-auto border-b border-gray-200 text-sm font-medium text-gray-600 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         <Link
           href="/admin"

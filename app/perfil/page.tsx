@@ -28,7 +28,7 @@ export default async function PerfilPage({
 
   if (!profile) {
     return (
-      <main className="flex min-h-[calc(100vh-57px)] flex-col items-center justify-center px-6 text-center">
+      <main className="flex min-h-[calc(100vh-56px)] flex-col items-center justify-center px-6 text-center">
         <p className="text-gray-600">
           Não foi possível carregar o seu perfil. Tente novamente mais tarde.
         </p>
@@ -37,7 +37,7 @@ export default async function PerfilPage({
   }
 
   return (
-    <main className="mx-auto min-h-[calc(100vh-57px)] max-w-md px-6 py-10">
+    <main className="mx-auto min-h-[calc(100vh-56px)] max-w-md px-6 py-10">
       <h1 className="text-2xl font-bold text-primary-dark">O meu perfil</h1>
       <p className="mt-1 text-sm text-gray-500">
         Estes dados aparecem nos seus anúncios.

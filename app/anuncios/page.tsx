@@ -121,6 +121,34 @@ export default async function AnunciosPage({
 
       <h1 className="text-2xl font-bold text-primary-dark">{title}</h1>
 
+      {/* Barra compacta de categorias com scroll horizontal */}
+      <div className="mt-4 flex gap-2 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+        <Link
+          href="/anuncios"
+          className={`flex shrink-0 items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium transition ${
+            !categoria
+              ? "border-primary bg-primary text-white"
+              : "border-gray-200 bg-white text-gray-700 hover:border-primary"
+          }`}
+        >
+          Todos
+        </Link>
+        {CATEGORIES.map((cat) => (
+          <Link
+            key={cat.slug}
+            href={`/anuncios?categoria=${cat.slug}${q ? `&q=${encodeURIComponent(q)}` : ""}`}
+            className={`flex shrink-0 items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium transition ${
+              categoria === cat.slug
+                ? "border-primary bg-primary text-white"
+                : "border-gray-200 bg-white text-gray-700 hover:border-primary"
+            }`}
+          >
+            <span>{cat.icon}</span>
+            {cat.name}
+          </Link>
+        ))}
+      </div>
+
       <div className="mt-4">
         <SearchFilters q={q} categoria={categoria} cidade={cidade} ordenar={ordenar} />
       </div>

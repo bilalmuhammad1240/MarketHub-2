@@ -21,14 +21,14 @@ export const MOZAMBIQUE_CITIES = [
 
 // Categorias padrão de anúncios (especificação, seção 6.4).
 export const CATEGORIES = [
-  { name: "Veículos", slug: "veiculos" },
-  { name: "Imóveis", slug: "imoveis" },
-  { name: "Eletrónicos", slug: "eletronicos" },
-  { name: "Serviços", slug: "servicos" },
-  { name: "Empregos", slug: "empregos" },
-  { name: "Moda", slug: "moda" },
-  { name: "Agricultura", slug: "agricultura" },
-  { name: "Educação", slug: "educacao" },
+  { name: "Veículos",    slug: "veiculos",    icon: "🚗" },
+  { name: "Imóveis",     slug: "imoveis",     icon: "🏠" },
+  { name: "Eletrónicos", slug: "eletronicos", icon: "📱" },
+  { name: "Serviços",    slug: "servicos",    icon: "🔧" },
+  { name: "Empregos",    slug: "empregos",    icon: "💼" },
+  { name: "Moda",        slug: "moda",        icon: "👗" },
+  { name: "Agricultura", slug: "agricultura", icon: "🌱" },
+  { name: "Educação",    slug: "educacao",    icon: "📚" },
 ] as const;
 
 // Opções de ordenação da página de pesquisa (especificação, seção 5.3).

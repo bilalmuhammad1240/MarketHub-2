@@ -1,5 +1,7 @@
 import Link from "next/link";
+import Image from "next/image";
 import { createClient } from "@/lib/supabase/server";
+import { getSiteSettings } from "@/lib/settings";
 import AccountMenu from "@/components/AccountMenu";
 
 export default async function Header() {
@@ -29,11 +31,26 @@ export default async function Header() {
     isAdmin = profile?.role === "admin";
   }
 
+  const settings = await getSiteSettings();
+
   return (
     <header className="sticky top-0 z-10 border-b border-gray-200 bg-white">
       <div className="mx-auto flex max-w-5xl items-center justify-between gap-2 px-4 py-3">
-        <Link href="/" className="shrink-0 text-lg font-bold text-primary-dark">
-          MozMarketHub
+        <Link href="/" className="flex shrink-0 items-center gap-2">
+          {settings.logo_url ? (
+            <Image
+              src={settings.logo_url}
+              alt={settings.site_name}
+              width={100}
+              height={32}
+              unoptimized
+              className="h-8 w-auto object-contain"
+            />
+          ) : (
+            <span className="text-lg font-bold text-primary-dark">
+              {settings.site_name}
+            </span>
+          )}
         </Link>
 
         <nav className="flex items-center gap-1 sm:gap-2">

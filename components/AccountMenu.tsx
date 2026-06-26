@@ -77,14 +77,24 @@ export default function AccountMenu({
             Os meus anúncios
           </Link>
           {isAdmin && (
-            <Link
-              href="/admin"
-              role="menuitem"
-              onClick={() => setOpen(false)}
-              className="block px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50"
-            >
-              Painel admin
-            </Link>
+            <>
+              <Link
+                href="/admin"
+                role="menuitem"
+                onClick={() => setOpen(false)}
+                className="block px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50"
+              >
+                Painel admin
+              </Link>
+              <Link
+                href="/admin/configuracoes"
+                role="menuitem"
+                onClick={() => setOpen(false)}
+                className="block px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50"
+              >
+                Configurações
+              </Link>
+            </>
           )}
           <div className="my-1 border-t border-gray-100" />
           <form action={logout} role="none">
